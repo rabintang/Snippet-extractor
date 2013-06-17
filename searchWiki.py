@@ -4,7 +4,11 @@
 import urllib
 import urllib2
 import re
+import sys
 from bs4 import BeautifulSoup
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 class WikiSnippet:
     def __ini__(self):
@@ -12,8 +16,7 @@ class WikiSnippet:
         self.url = None
     
     def get_html(self,title):
-        if isinstance(title,unicode):
-            title = title.encode('utf-8')
+        title = title.decode('utf-8').encode('gbk')
         title = title.upper()
         article = urllib.quote(title)
         opener = urllib2.build_opener()
@@ -30,16 +33,20 @@ class WikiSnippet:
     def __parse_snippet(self, data):
         if data:
             soup = BeautifulSoup(data)
-            param = soup.find('div',id='mw-content-text')
-            if param and len(param.contents) > 2:
-                child = param.contents[2]
-                if len(child.contents) > 1 and child.contents[1].name == 'li':
-                    href_list = child.contents[1].find_all('a')
-                    title = href_list[len(href_list)-1]['title']
-                    data = self.get_html(title)
-                    return self.__parse_snippet(data)
-            if soup.find('div',id='noarticletext_technical') == None:
-                return param.p.get_text()
+            if soup.find('table',id='disambigbox') != None: # It is a disambiguate page
+                try:
+                    li = soup.find('div',id='mw-content-text').li
+                    if li:
+                        href_list = li.find_all('a')
+                        title = href_list[len(href_list)-1]['title']
+                        data = self.get_html(title)
+                        return self.__parse_snippet(data)
+                    else:
+                        return None
+                except:
+                    return None
+            elif soup.find('div',id='noarticletext_technical') == None:
+                return soup.find('div',id='mw-content-text').p.get_text()
         return None
 
     def get_snippet(self,title):

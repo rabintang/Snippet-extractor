@@ -27,17 +27,20 @@ class GoogleSnippet:
                 '&num=1')%(key,cx,urllib.quote(keyword))
         try:
             request = urllib2.Request(url, None)
-            response = urllib2.urlopen(request)
+            response = urllib2.urlopen(url)
             #Process the JSON string.
             results = simplejson.load(response)
+            print results
             info = results['items']
             return info
         except Exception,e:
+            print e
             return None
 
     def get_snippet(self, title):
         index = GoogleSnippet.counter / 100
         results = self.__searchKey(self.keys[index],self.cx,title)
+        print results
         GoogleSnippet.counter = GoogleSnippet.counter+1
         if results:
             return results[0]['snippet']

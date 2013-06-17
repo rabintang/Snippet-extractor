@@ -4,14 +4,17 @@
 import re
 import urllib
 import urllib2
+import sys
 from bs4 import BeautifulSoup
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 class BaikeSnippet:
     def get_html(self,title):
         title = title.decode('utf-8').encode('gbk')
         keyword = urllib.quote(title)
         url = 'http://baike.baidu.com/search?word='+keyword+'&type=0&pn=0&rn=10&submit=search'
-        print url
         try:
             req = urllib2.Request(url)
             result = urllib2.urlopen(req)
